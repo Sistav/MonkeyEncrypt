@@ -7,12 +7,16 @@ fn main() {
     let request = &args[1];
     let file_path = &args[2];
     
-    let bin = convert_to_bytes(file_path);
+    let bytes_or_something_idk = convert_to_bytes(file_path);
     let mut monkey = "".to_string();
-
+    let mut bin = "".to_string();
+    for character in bytes_or_something_idk.clone(){
+        bin += &format!("0{:b}", character);
+    }
     if request == "-w"{
-        for char in bin.clone(){
-            if char == 0 {
+        
+        for char in bin.clone().chars(){
+            if char == '0' {
                 monkey += "oo ";
             }else{
                 monkey += "ah "
