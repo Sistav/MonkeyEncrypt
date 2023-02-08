@@ -11,7 +11,7 @@ fn main() {
     let mut monkey = "".to_string();
     let mut bin = "".to_string();
     for character in bytes_or_something_idk.clone(){
-        bin += &format!("0{:b}", character);
+        bin += &format!("{:b}", character);
     }
     if request == "-w"{
         
