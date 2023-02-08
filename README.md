@@ -1,5 +1,5 @@
 # MonkeyEncrypt
 Turn your files into monkey noises
 
-#Usage
+## Usage
 ```monkeyencrypt.exe -r monkeywords.txt```
