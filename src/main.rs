@@ -1,42 +1,107 @@
-use std::fs;
+use std::fs::*;
+use std::io::*;
 use std::env;
-use std::io::Read;
+use std::path::*;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let request = &args[1];
+    if args.len() < 3 {
+        eprintln!("Usage: program -w|-r file_path");
+        return;
+    }
+
+    let operation = &args[1];
     let file_path = &args[2];
-    
-    let bytes_or_something_idk = convert_to_bytes(file_path);
-    let mut monkey = "".to_string();
-    let mut bin = "".to_string();
-    for character in bytes_or_something_idk.clone(){
-        bin += &format!("{:b}", character);
+
+    match operation.as_str() {
+        "-w" => encode_file(file_path),
+        "-r" => decode_file(file_path),
+        _ => eprintln!("Invalid option. Use -w to write or -r to read."),
     }
-    if request == "-w"{
-        
-        for char in bin.clone().chars(){
-            if char == '0' {
-                monkey += "oo ";
-            }else{
-                monkey += "ah "
-            }
-        }
-        println!("{}", monkey);
-    }
-    else if request == "-r" {
-        println!("read");
-    }
-    else {
-        println!("Not a valid option");
-    }
-   
 }
 
-fn convert_to_bytes(filename: &String) -> Vec<u8> {
-    let mut f = fs::File::open(&filename).expect("no file found");
-    let metadata = fs::metadata(&filename).expect("unable to read file");
+fn encode_file(file_path: &String) {
+    if let Ok(file_data) = read_file(file_path) {
+        let encoded_data = convert_to_monkey(&file_data);
+        let file_name = get_file_name(file_path);
+        let output_path = format!("{}.monkey", file_name);
+
+        save_file(&output_path, &format!("{}\n{}", file_name, encoded_data));
+        println!("File encoded to {}", output_path);
+    } else {
+        eprintln!("Error reading file {}", file_path);
+    }
+}
+
+fn decode_file(monkey_file_path: &String) {
+    if let Ok((original_file_name, encoded_data)) = load_monkey_file(monkey_file_path) {
+        let file_data = convert_from_monkey(&encoded_data);
+        save_file_raw(&original_file_name, &file_data);
+        println!("File decoded to {}", original_file_name);
+    } else {
+        eprintln!("Error reading monkey file {}", monkey_file_path);
+    }
+}
+
+fn read_file(filename: &String) -> std::io::Result<Vec<u8>> {
+    let mut file = File::open(filename)?;
+    let metadata = file.metadata()?;
     let mut buffer = vec![0; metadata.len() as usize];
-    f.read(&mut buffer).expect("buff");
-    return buffer;
+    file.read(&mut buffer)?;
+    Ok(buffer)
+}
+
+fn convert_to_monkey(data: &[u8]) -> String {
+    let bin_str = data.iter()
+        .map(|&byte| format!("{:08b}", byte))
+        .collect::<String>();
+
+    bin_str.chars()
+        .map(|bit| if bit == '0' { "oo" } else { "ah" })
+        .collect::<String>()
+}
+
+fn convert_from_monkey(encoded_data: &String) -> Vec<u8> {
+    let bin_str = encoded_data.chars()
+        .collect::<Vec<char>>()
+        .chunks(2)
+        .map(|chunk| if chunk == ['o', 'o'] { '0' } else { '1' })
+        .collect::<String>();
+
+    bin_str.as_bytes()
+        .chunks(8)
+        .map(|byte| u8::from_str_radix(&String::from_utf8_lossy(byte), 2).unwrap())
+        .collect::<Vec<u8>>()
+}
+
+fn load_monkey_file(file_path: &String) -> std::io::Result<(String, String)> {
+    let file = File::open(file_path)?;
+    let mut reader = BufReader::new(file);
+    let mut first_line = String::new();
+    reader.read_line(&mut first_line)?;
+
+    let original_file_name = first_line.trim().to_string();
+    let mut encoded_data = String::new();
+    reader.read_to_string(&mut encoded_data)?;
+    
+    Ok((original_file_name, encoded_data))
+}
+
+fn save_file(file_path: &String, data: &str) {
+    let mut file = File::create(file_path).expect("Unable to create file");
+    file.write_all(data.as_bytes()).expect("Unable to write to file");
+}
+
+fn save_file_raw(file_path: &String, data: &[u8]) {
+    let mut file = File::create(file_path).expect("Unable to create file");
+    file.write_all(data).expect("Unable to write to file");
+}
+
+fn get_file_name(file_path: &String) -> String {
+    Path::new(file_path)
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string()
 }
