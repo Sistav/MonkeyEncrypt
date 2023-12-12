@@ -8,7 +8,7 @@ Encrypt your files into monkey noises, it works with any file type!
 To encode a file, run:
 
 ```bash
-./monkey_encrypt -w monkeywords.txt
+./monkeyencrypt -w monkeywords.txt
 ```
 
 A `.monkey` file will appear in the same folder
@@ -17,5 +17,5 @@ A `.monkey` file will appear in the same folder
 To decode a file, simply run:
 
 ```bash
-./monkey_encrypt -r monkeywords.txt.monkey
+./monkeyencrypt -r monkeywords.txt.monkey
 ```
