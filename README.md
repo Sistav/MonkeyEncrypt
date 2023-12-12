@@ -1,17 +1,14 @@
 # MonkeyEncrypt
 
 ## About
-Turn your Files into monkey noises
-
-## Installation
-To install MonkeyEncrypt, clone the repository and build the project using cargo.
+Encrypt your files into monkey noises, it works with any file type!
 
 ## Usage
 ### Encoding a File
 To encode a file, run:
 
 ```bash
-./monkey_encrypt -w your_file.txt
+./monkey_encrypt -w monkeywords.txt
 ```
 
 A `.monkey` file will appear in the same folder
@@ -20,5 +17,5 @@ A `.monkey` file will appear in the same folder
 To decode a file, simply run:
 
 ```bash
-./monkey_encrypt -r your_file.monkey
+./monkey_encrypt -r monkeywords.txt.monkey
 ```
